@@ -1,0 +1,371 @@
+\documentclass{beamer}
+\usetheme{CambridgeUS}
+
+\definecolor{CustomBlue}{rgb}{0.2588, 0.5216, 0.9569}
+\definecolor{CustomRed}{rgb}{0.8588, 0.2667, 0.2157}
+\definecolor{CustomYellow}{rgb}{0.9569, 0.6275, 0}
+\definecolor{CustomGreen}{rgb}{0.0588, 0.6157, 0.3451}
+\setbeamercolor{palette primary}{bg=CustomBlue!70,fg=black}
+\setbeamercolor{palette secondary}{bg=CustomYellow!75,fg=black}
+\setbeamercolor{palette tertiary}{bg=CustomRed!70,fg=black}
+\setbeamercolor{structure}{fg=CustomGreen}
+\setbeamercolor{title}{fg=CustomGreen!60!black,bg=CustomGreen!5}
+\setbeamercolor{frametitle}{fg=CustomGreen!60!black,bg=CustomGreen!5}
+\setbeamercolor{block title}{fg=white,bg=CustomGreen}
+\setbeamercolor{block body}{bg=CustomGreen!10}
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray!70!CustomGreen},
+  language=Python,
+  aboveskip=0pt,
+  belowskip=0pt,
+  showstringspaces=false,
+}
+
+\usepackage{multicol}
+% 0.5 times of original value
+\setlength{\multicolsep}{6.0pt plus 2.0pt minus 1.5pt}
+
+% use bold fonts to emphasize
+\DeclareTextFontCommand{\emph}{\boldmath\bfseries}
+
+\title{Week 01: Introduction to Algorithms}
+\author{FanFly}
+\date{March 8, 2020}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Computational Problems and Algorithms}
+\subsection{Computational Problems}
+\begin{frame}{Computational Problems}
+  What is a computational problem? \pause
+  \begin{itemize}
+    \item A \emph{computational problem} is a relation between inputs and
+    outputs.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The Primality Test Problem}
+  Here is an example. \pause
+  \begin{block}{The Primality Test Problem}
+    \pause
+    \begin{itemize}
+      \item Input: A positive integer $m \geq 2$. \pause
+      \item Output: True if $m$ is prime, false if $m$ is composite. \pause
+    \end{itemize}
+  \end{block}
+  Let's try to solve it for some instances by hand. \pause
+  \begin{itemize}
+    \item Is 11 a prime number? \pause
+    Yes, it is. \pause
+    \item Is 111 a prime number? \pause
+    No, it isn't since $111 = 3 \times 37$. \pause
+    \item Is 1111 a prime number? \pause
+    No, it isn't since $1111 = 11 \times 101$. \pause
+    \item Is 11111 a prime number? \pause
+    No, it isn't since $11111 = 41 \times 271$. \pause
+    \item Is 1111111111111111111 a prime number? \pause
+    Yes, it is.
+  \end{itemize}
+\end{frame}
+
+\subsection{Algorithms}
+\begin{frame}[fragile]{Algorithms}
+  It's too difficult to test if an integer is prime by hand. \\
+  Thus, people write programs to solve it. \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def is_prime(m):
+        k = 2
+        while k < m:
+            if m % k == 0:
+                return False
+            k += 1
+        return True
+    \end{lstlisting}
+    \pause
+  \end{block}
+  This function (in Python) produces a correct output for each possible
+  input of the problem. \pause
+  \begin{itemize}
+    \item If a function produces a correct output for each possible
+    input of a problem, we say that it \emph{solves} the problem.
+    \item Formally, we call such a function an \emph{algorithm}.
+  \end{itemize}
+\end{frame}
+
+\subsection{Measurement}
+\begin{frame}{Hardness of a Problem}
+  In most cases, we would like to measure the ``hardness'' of a problem. \pause
+  \begin{itemize}
+    \item Assume that there is a program (i.e., an algorithm) that solves the
+    problem. \pause
+    \item We can measure how long it takes to execute the program. \pause
+    \item We can measure how much memory it uses to execute the program. \pause
+  \end{itemize}
+  However, the measurement may not be consistent due to some reasons. \pause
+  \begin{itemize}
+    \item The input may change. \pause
+    \item The programming language may change. \pause
+    \item The power of the computer (on which the program runs) may change.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Computation Models}
+  In order to make the measurement consistent in any situation, we have to
+  specify a computation model. \pause \\[.5em]
+  For example, we can define the following operations as \emph{primitive} ones,
+  each consumes one unit of time.
+  \pause
+  \begin{itemize}
+    \item Assigning a value to a variable. \pause
+    \item Performing an arithmetic or logical operation. \pause
+    \item Indexing into an array (i.e., a \lstinline{list} in Python). \pause
+    \item Performing a jump due to branch, loop or function call. \pause
+  \end{itemize}
+  Then the executation time can be measured regardless of the environment.
+\end{frame}
+
+\section{Asymptotic Analysis}
+\subsection{Time Complexity}
+\begin{frame}[fragile]{Analysis of Time Complexity}
+  Let us consider this program again.
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def is_prime(m):
+        k = 2
+        while k < m:
+            if m % k == 0:
+                return False
+            k += 1
+        return True
+    \end{lstlisting}
+    \pause
+  \end{block}
+  Given the input $m$, it can be shown that the statements inside the
+  \lstinline{while} loop is executed at most $m - 2$ times. \pause
+  \begin{itemize}
+    \item Note that the \lstinline{return} statement inside the
+    \lstinline{while} loop is not executed if $m$ is prime. \pause
+    \item In this case, the running time is ``approximately'' proportional
+    to $m$. \pause
+    \item If the running time of a program is ``approximately'' proportional to
+    $m$, we say that the \emph{time complexity} of this program is $O(m)$.
+  \end{itemize}
+\end{frame}
+
+\subsection{The Big-O Notation}
+\begin{frame}{The Big-O Notation}
+  What does $O(\cdot)$ mean?
+  We state the definition formally. \pause
+  \begin{block}{Definition (Big-O Notation)}
+    Let $f: \mathbb{N} \to \mathbb{R}$ and $g: \mathbb{N} \to \mathbb{R}$ be
+    functions.
+    If there exists a constant $c > 0$ and an integer $N$ such that
+    \begin{equation*}
+      0 \leq f(n) \leq cg(n)
+    \end{equation*}
+    for each $n \geq N$, then we write $f(n) = O(g(n))$.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Examples of Big-O Notation}
+  Following are some examples. \pause
+  \begin{itemize}
+    \item Is $1365n = O(n)$ true? \pause
+    Yes, it is since $1365n \leq cn$ with $c = 1365$. \pause
+    \item Is $n^2 = O(n)$ true? \pause
+    No, it isn't since $n^2 > cn$ if $n > \lceil c \rceil$.
+  \end{itemize}
+\end{frame}
+
+\subsection{Input Size}
+\begin{frame}{Input Size}
+  Now we have an algorithm that solves the primality test problem in $O(m)$
+  time.
+  \begin{block}{The Primality Test Problem}
+    \begin{itemize}
+      \item Input: An $n$-bit positive integer $m \geq 2$.
+      \item Output: True if $m$ is prime, false if $m$ is composite. \pause
+    \end{itemize}
+  \end{block}
+  Can we use $n$ (instead of $m$) to represent the time complexity of the
+  algorithm? \pause
+  \begin{itemize}
+    \item An $n$-bit binary number can represent up to $2^n - 1$. \pause
+    \item One should use at least $n = \lceil\log_2 (m + 1)\rceil$ bits
+    to represent a positive integer $m$. \pause
+    \item Thus the time complexity of the algorithm is $O(2^n)$.
+  \end{itemize}
+\end{frame}
+
+\subsection{Comparison between Algorithms}
+\begin{frame}{Comparison between Algorithms}
+  Suppose that we have two algorithms that solve the same problem. \pause
+  \begin{itemize}
+    \item Algorithm A runs in $O(n^2)$ time. \pause
+    \item Algorithm B runs in $O(n)$ time. \pause
+  \end{itemize}
+  Can we thus say that Algorithm B is better than Algorithm A? \pause \\[.5em]
+  No! Note that we also have the following results. \pause
+  \begin{itemize}
+    \item Algorithm A runs in $O(n^3)$ time. \pause
+    \item Algorithm B runs in $O(n^4)$ time. \pause
+  \end{itemize}
+  Thus, using big-O notation is not enough to compare the efficiency of
+  different algorithms.
+\end{frame}
+
+\begin{frame}{The Big-Omega and Big-Theta Notations}
+  Let us introduce new notations, $\Omega(\cdot)$ and $\Theta(\cdot)$. \pause
+  \begin{block}{Definition (Big-Omega and Big-Theta Notations)}
+    Let $f: \mathbb{N} \to \mathbb{R}$ and $g: \mathbb{N} \to \mathbb{R}$ be
+    functions. \pause
+    \begin{itemize}
+      \item We write $f(n) = \Omega(g(n))$ if $g(n) = O(f(n))$. \pause
+      \item We write $f(n) = \Theta(g(n))$ if $f(n) = O(g(n))$ and
+      $g(n) = O(f(n))$. \pause
+    \end{itemize}
+  \end{block}
+  Suppose again that we have two algorithms that solve the same problem. \pause
+  \begin{itemize}
+    \item Algorithm A runs in $\Omega(n^2)$ time. \pause
+    \item Algorithm B runs in $O(n)$ time. \pause
+  \end{itemize}
+  Now we can say that Algorithm B is better than Algorithm A (in time
+  complexity).
+\end{frame}
+
+\section{Exercises}
+\subsection{\#1}
+\begin{frame}[fragile]{Exercise \#1}
+  We know that there is an $O(2^n)$-time algorithm that solves the primality
+  test problem for $n$-bit inputs as follows.
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def is_prime(m):
+        k = 2
+        while k < m:
+            if m % k == 0:
+                return False
+            k += 1
+        return True
+    \end{lstlisting}
+    \pause
+  \end{block}
+  In fact, it runs in time $\Theta(2^n)$ if we consider the worst-case
+  complexity.
+\end{frame}
+
+\begin{frame}[fragile]{Exercise \#1 (cont.)}
+  Now we have an improvement on this algorithm.
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def is_prime(m):
+        k = 2
+        # Only test k <= sqrt(m)
+        while k * k <= m:
+            if m % k == 0:
+                return False
+            k += 1
+        return True
+    \end{lstlisting}
+    \pause
+  \end{block}
+  What is the worst-case time complexity of this algorithm?
+  \begin{multicols}{4}
+    \begin{itemize}
+      \item $\Theta(n)$
+      \item $\Theta(2^{\sqrt{n}})$
+      \item $\Theta(2^{n/2})$
+      \item $\Theta(2^n)$ \pause
+    \end{itemize}
+  \end{multicols}
+  \begin{block}{Solution}
+    The worst-case time complexity is $\Theta(\sqrt{2^n}) = \Theta(2^{n/2})$.
+  \end{block}
+\end{frame}
+
+\subsection{\#2}
+\begin{frame}{Exercise \#2}
+  Let $f: \mathbb{N} \to \mathbb{R}$ be a function with
+  \begin{equation*}
+    f(n) = \sum_{k=1}^n \frac{1}{k}
+    = \frac{1}{1} + \frac{1}{2} + \cdots + \frac{1}{n}
+  \end{equation*}
+  for any positive integer $n$. \pause \\[.5em]
+  Find an elementary function $g: \mathbb{N} \to \mathbb{R}$ such that
+  $f(n) = \Theta(g(n))$. \pause
+  \begin{block}{Solution}
+    We have $f(n) = \Theta(\ln n)$ since
+    \begin{equation*}
+      \int_1^{n+1} \frac{1}{t}\,dt
+      \quad \leq \quad f(n)
+      \quad \leq \quad 1 + \int_1^n \frac{1}{t}\,dt.
+    \end{equation*}
+  \end{block}
+\end{frame}
+
+\subsection{\#3}
+\begin{frame}[fragile]{Exercise \#3}
+  Consider the following function.
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def hello(n):
+        if n == 0:
+            return
+        elif n == 1:
+            print("Hello!")
+        else:
+            hello(n - 2)
+            hello(n - 1)
+    \end{lstlisting}
+    \pause
+  \end{block}
+  Let $H(n)$ be the number of lines of \lstinline{"Hello!"} printed by this
+  function, given the input $n$. \pause \\[.5em]
+  Then we have
+  \begin{equation*}
+    H(n) =
+    \begin{cases}
+      0, & \text{if $n = 0$} \\
+      1, & \text{if $n = 1$} \\
+      H(n-2) + H(n-1), & \text{otherwise}.
+    \end{cases}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Exercise \#3 (cont.)}
+  Which of the following is true?
+  \begin{itemize}
+    \item $H(n) = O(n)$.
+    \item $H(n) = \Omega(n)$ and $H(n) = O(n^2)$.
+    \item $H(n) = \Omega(n^2)$ and $H(n) = O(2^n)$.
+    \item $H(n) = \Omega(2^n)$. \pause
+  \end{itemize}
+  \begin{block}{Solution}
+    Note that $H(n)$ is the $n$th Fibonacci number. \pause
+    Thus we have
+    \begin{equation*}
+      H(n)
+      = \frac{\left(\frac{1+\sqrt{5}}{2}\right)^n
+        - \left(\frac{1-\sqrt{5}}{2}\right)^n}{\sqrt{5}}
+      = \Theta\left(\left(\frac{1+\sqrt{5}}{2}\right)^n\right),
+    \end{equation*}
+    implying $H(n) = \Omega(n^2)$ and $H(n) = O(2^n)$.
+  \end{block}
+\end{frame}
+\end{document}
