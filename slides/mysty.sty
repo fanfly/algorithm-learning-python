@@ -1,0 +1,35 @@
+\usetheme{CambridgeUS}
+
+\definecolor{CustomBlue}{rgb}{0.2588, 0.5216, 0.9569}
+\definecolor{CustomRed}{rgb}{0.8588, 0.2667, 0.2157}
+\definecolor{CustomYellow}{rgb}{0.9569, 0.6275, 0}
+\definecolor{CustomGreen}{rgb}{0.0588, 0.6157, 0.3451}
+\setbeamercolor{palette primary}{bg=CustomBlue!70,fg=black}
+\setbeamercolor{palette secondary}{bg=CustomYellow!75,fg=black}
+\setbeamercolor{palette tertiary}{bg=CustomRed!70,fg=black}
+\setbeamercolor{structure}{fg=CustomGreen}
+\setbeamercolor{title}{fg=CustomGreen!60!black,bg=CustomGreen!5}
+\setbeamercolor{frametitle}{fg=CustomGreen!60!black,bg=CustomGreen!5}
+\setbeamercolor{block title}{fg=white,bg=CustomGreen}
+\setbeamercolor{block body}{bg=CustomGreen!10}
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray!70!CustomGreen},
+  language=Python,
+  aboveskip=0pt,
+  belowskip=0pt,
+  showstringspaces=false,
+}
+
+\usepackage{tikz}
+
+\usepackage{multicol}
+% 0.5 times of original value
+\setlength{\multicolsep}{6.0pt plus 2.0pt minus 1.5pt}
+
+% use bold fonts to emphasize
+\DeclareTextFontCommand{\emph}{\boldmath\bfseries}

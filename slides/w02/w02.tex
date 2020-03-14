@@ -1,0 +1,388 @@
+\documentclass{beamer}
+\usepackage{../mysty}
+
+\title{Week 02: Sorting}
+\author{FanFly}
+\date{March 15, 2020}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Time Complexity of a Problem}
+  The time complexity $T(n)$ of a problem $P$ is the time complexity of the
+  ``best'' algorithm that solves $P$. \pause
+  \begin{itemize}
+    \item We have $T(n) = O(f(n))$
+    if there is an algorithm that solves $P$ in $O(f(n))$ time. \pause
+    \item We have $T(n) = \Omega(f(n))$
+    if any algorithm that solves $P$ needs $\Omega(f(n))$ time.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The Primality Test Problem}
+  \begin{block}{The Primality Test Problem}
+    \begin{itemize}
+      \item Input: An $n$-bit positive integer $m \geq 2$.
+      \item Output: True if $m$ is prime, false if $m$ is composite. \pause
+    \end{itemize}
+  \end{block}
+  \begin{itemize}
+    \item Last week, we found an $O(2^{n/2})$-time algorithm that solves the
+    primality test problem. \pause
+    \item An $O(n^{12}(\log_2 n)^\epsilon)$-time algorithm, called the AKS
+    primality test, was proposed in 2002.
+    ($\epsilon$ is a positive number.) \pause
+    \item In 2005, it is improved to run in $O(n^6(\log_2 n)^\epsilon)$ time.
+    \pause
+    \item Thus, now we know that the primality test problem can be solved in
+    $O(n^6(\log_2 n)^\epsilon)$ time, but no one knows if there is a faster
+    algorithm than the ones above.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{The Champion Problem}
+  \begin{block}{The Champion Problem}
+    \begin{itemize}
+      \item Input: An array $A$ of $n$ numbers (indexed from $0$ to $n-1$).
+      \item Output: An index $i$ such that $A[i] \geq A[j]$ for any index $j$.
+      \pause
+    \end{itemize}
+  \end{block}
+  There is a $O(n)$-time algorithm that solves the problem as follows. \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def index_max(A):
+        i = 0
+        for j in range(1, len(A)):
+            if A[j] > A[i]:
+                i = j
+        return i
+    \end{lstlisting}
+    \pause
+  \end{block}
+  Also, note that we need at least $n-1$ comparisons to solve the problem,
+  implying that the time complexity of the problem is $\Omega(n)$. \pause
+  \\[.5em]
+  Thus, we have found an \emph{optimal} algorithm for the champion problem.
+\end{frame}
+
+\begin{frame}{The Sorting Problem}
+  \begin{block}{The Sorting Problem}
+    \begin{itemize}
+      \item Input: An array $A$ of $n$ numbers (indexed from $0$ to $n-1$).
+      \item Output: A non-decreasing array that is reordered from $A$.
+      \pause
+    \end{itemize}
+  \end{block}
+  We have known that there is an algorithm, called merge sort, that can solve
+  the sorting problem.
+\end{frame}
+
+\begin{frame}[fragile]{Merging Sorted Arrays}
+  First, we propose an algorithm merging two sorted arrays $P$ and $Q$ into
+  a sorted array $A$. \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def merge(P, Q, i, j):
+        if j == len(Q):
+            return P
+        elif i == len(P):
+            return Q
+        else:
+            if P[i] <= Q[j]:
+                return [P[i]] + merge(P, Q, i + 1, j)
+            else:
+                return [Q[j]] + merge(P, Q, i, j + 1)
+    \end{lstlisting}
+  \end{block}
+  \begin{center}
+    \begin{tikzpicture}[scale=0.7,every node/.style={scale=0.7}]
+      \begin{scope}
+        \node[CustomRed!70!black] at (0, 0) {$P$};
+        \foreach \x [count=\i] in {2, 3, 5, 7, 11, 13} {
+          \draw[shift={(\i, 0)},
+            {\ifnum \i<4 black!30\else black\fi},
+            fill={\ifnum \i<4 white\else CustomRed!10\fi},
+          ]
+            (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \begin{scope}[shift={(7.5, 0)}]
+        \node[CustomBlue!70!black] at (0, 0) {$Q$};
+        \foreach \x [count=\i] in {4, 6, 8, 10, 12, 14, 15} {
+          \draw[shift={(\i, 0)},
+            {\ifnum \i<3 black!30\else black\fi},
+            fill={\ifnum \i<3 white\else CustomBlue!10\fi},
+          ]
+            (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+    \end{tikzpicture}
+    \pause
+  \end{center}
+  It can be shown that the algorithm runs in $\Theta(n)$ time.
+\end{frame}
+
+\begin{frame}[fragile]{Merge Sort}
+  Then we can sort the array by repeating merging its subarrays.
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def merge_sort(A, l, r):
+        if r - l <= 1:
+            return a[l:r]
+        else:
+            m = (l + r) // 2
+            P = merge_sort(A, l, m)
+            Q = merge_sort(A, m, r)
+            return merge(P, Q, 0, 0)
+    \end{lstlisting}
+    \pause
+  \end{block}
+  The time complexity of merge sort is
+  \begin{equation*}
+    T(n) =
+    \begin{cases}
+      O(1), & \text{if $n \leq 1$} \\
+      2T(n / 2) + \Theta(n), & \text{otherwise}.
+    \end{cases}
+  \end{equation*}
+  \pause
+  What is the exact time complexity of merge sort?
+\end{frame}
+
+\begin{frame}{Master Theorem}
+  \begin{block}{Theorem (Master Theorem)}
+    \pause
+    \small
+    Let $T(n)$ be a positive function satisfying the following recurrence
+    relation.
+    \begin{equation*}
+      T(n) =
+      \begin{cases}
+        O(1), & \text{if $n \leq 1$} \\
+        aT(n / b) + M(n), & \text{otherwise}.
+      \end{cases}
+    \end{equation*}
+    Let $c = \log_b a$.
+    \begin{itemize}
+      \item If $M(n) = O(n^k)$ with $k < c$, then $T(n) = \Theta(n^c)$. \pause
+      \item If $M(n) = \Theta(n^k)$ with $k = c$,
+      then $T(n) = \Theta(n^c \log_2 n)$. \pause
+      \item If $M(n) = \Omega(n^k)$ with $k > c$, then $T(n) = \Theta(M(n))$.
+      \pause
+    \end{itemize}
+  \end{block}
+  Thus, the time complexity of merge sort is $T(n) = \Theta(n \log_2 n)$ since
+  \begin{equation*}
+    T(n) =
+    \begin{cases}
+      O(1), & \text{if $n \leq 1$} \\
+      2T(n / 2) + \Theta(n), & \text{otherwise}.
+    \end{cases}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Lower Bound of Comparison-Based Sorting}
+  Any comparison-based algorithm can be seen as a binary tree. \pause
+  \begin{center}
+    \begin{tikzpicture}[
+      >=latex,
+      every node/.style={rectangle,fill=CustomGreen!30,minimum size=.5cm,
+                         font=\scriptsize\ttfamily},
+      edge from parent/.style={draw,black,->},
+      level 1/.style={sibling distance=4.5cm},
+      level 2/.style={sibling distance=2.5cm}, 
+      level 3/.style={sibling distance=2.5cm},
+      level distance=1cm,
+    ]
+      \node[circle,fill=CustomRed!50] {}
+      child {
+        node[circle,fill=CustomYellow!50] {}
+        child {
+          node[circle,fill=CustomBlue!50] {}
+          child { node {[1, 2, 3]} }
+          child { node {[1, 3, 2]} }
+        }
+        child { node {[3, 1, 2]} }
+      }
+      child {
+        node[circle,fill=CustomYellow!50] {}
+        child { node {[2, 1, 3]} }
+        child {
+          node[circle,fill=CustomBlue!50] {}
+          child { node {[2, 3, 1]} }
+          child { node {[3, 2, 1]} }
+        }
+      };
+    \end{tikzpicture}
+    \pause
+  \end{center}
+  Since there are $n!$ leaves, we know that the height of the binary tree is
+  at least
+  \begin{equation*}
+    h = \log_2(n!),
+  \end{equation*}
+  implying that any comparison-based algorithm runs in $\Omega(\log_2(n!))$
+  time.
+\end{frame}
+
+\begin{frame}{Lower Bound of Comparison-Based Sorting (cont.)}
+  Note that
+  \begin{align*}
+    \log_2 (n!)
+    &= \log_2 (n \times (n-1) \times \cdots \times 2 \times 1) \\
+    &\geq \log_2 \Biggl(n \times (n-1) \times \cdots \times
+          \biggl\lceil\frac{n+1}{2}\biggr\rceil\Biggr) \\
+    &\geq \frac{n}{2} \log_2 \left(\frac{n}{2}\right) \\[.3em]
+    &= \frac{n}{2} (\log_2 n - 1) \\[.3em]
+    &= \Omega(n \log_2 n).
+  \end{align*}
+  \pause
+  Thus, any comparison-based algorithm runs in $\Omega(n \log_2 n)$ time.
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \begin{block}{The Sorting Problem}
+    \begin{itemize}
+      \item Input: An array $A$ of $n$ numbers (indexed from $0$ to $n-1$).
+      \item Output: A non-decreasing array that is reordered from $A$.
+    \end{itemize}
+  \end{block}
+  For any computational problem, the final goal is to find an optimal algorithm
+  that solves the problem. \pause
+  \begin{itemize}
+    \item The merge sort algorithm runs in $O(n \log_2 n)$ time. \pause
+    \item Any comparison-based algorithm that solves the sorting problem must
+    run in $\Omega(n \log_2 n)$ time. \pause
+    \item Thus, the merge sort algorithm is an optimal comparison-based
+    algorithm that solves the sorting problem.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exercise \#1}
+  We have learned the binary search algorithm, which can search a value in a
+  sorted array. \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def binary_search(A, val, l, r):
+        if val <= A[l]:
+            return l
+        elif val > A[r - 1]:
+            return r
+        else:
+            m = (l + r) // 2
+            if val <= A[m]:
+                return binary_search(A, val, l, m)
+            else:
+                return binary_search(A, val, m + 1, r)
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Exercise \#1 (cont.)}
+  It can be shown that the time complexity of binary search is
+  \begin{equation*}
+    T(n) =
+    \begin{cases}
+      O(1), & \text{if $n \leq 1$} \\
+      T(n / 2) + O(1), & \text{otherwise}.
+    \end{cases}
+  \end{equation*}
+  \pause
+  Please find the exact time complexity of binary search using the master
+  theorem.
+  \begin{block}{\scriptsize Theorem (Master Theorem)}
+    \scriptsize
+    Let $T(n)$ be a positive function satisfying the following recurrence
+    relation.
+    \begin{equation*}
+      T(n) =
+      \begin{cases}
+        O(1), & \text{if $n \leq 1$} \\
+        aT(n / b) + M(n), & \text{otherwise}.
+      \end{cases}
+    \end{equation*}
+    Let $c = \log_b a$.
+    \begin{itemize}
+      \item If $M(n) = O(n^k)$ with $k < c$, then $T(n) = \Theta(n^c)$.
+      \item If $M(n) = \Theta(n^k)$ with $k = c$,
+      then $T(n) = \Theta(n^c \log_2 n)$.
+      \item If $M(n) = \Omega(n^k)$ with $k > c$, then $T(n) = \Theta(M(n))$.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Exercise \#1 (cont.)}
+  \begin{block}{Solution}
+    Let $c = \log_2 1 = 0$ and $M(n) = O(1)$.
+    Since $M(n) = \Theta(n^c)$, we have
+    \begin{equation*}
+      T(n) = \Theta(n^c \log_2 n) = \Theta(\log_2 n),
+    \end{equation*}
+    which means that binary search runs in logarithmic time.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Exercise \#2}
+  Suppose that $f$ and $g$ are functions such that
+  \begin{equation*}
+    f(n) = \Theta(\log_2 n)
+    \quad \text{and} \quad
+    g(n) = \Theta(\log_e n),
+  \end{equation*}
+  and we know the fact that $2.718 < e < 2.719$. \\[.5em] \pause
+  Which of the following is true? \pause
+  \begin{itemize}
+    \item $f(n) = O(g(n))$ and $f(n) \neq \Omega(g(n))$. \pause
+    \item $f(n) = \Theta(g(n))$. \pause
+    \item $f(n) = \Omega(g(n))$ and $f(n) \neq O(g(n))$. \pause
+  \end{itemize}
+  \begin{block}{Solution}
+    \small
+    We have $f(n) = \Theta(g(n))$ since
+    \begin{equation*}
+      \frac{\log_e n}{\log_2 n} = \log_e 2.
+    \end{equation*}
+    (From now on we'll use $O(\log n)$ instead of $O(\log_k n)$ to represent
+    logarithm.)
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Exercise \#3}
+  Please find the time complexity of the following algorithm using big-O
+  notation. \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def magic_sort(A):
+        P = list(A)
+        Q = []
+        while P:
+            Q.append(P.pop(index_min(P)))
+        return Q
+    \end{lstlisting}
+    \pause
+  \end{block}
+  We have the following assumption, where $n$ is the length of \lstinline{ls}.
+  \pause
+  \begin{itemize}
+    \item \lstinline{index_min(ls)} returns the index of the smallest item in
+    \lstinline{ls} in $O(n)$ time. \pause
+    \item \lstinline{ls.append(val)} adds \lstinline{val} to the end of
+    \lstinline{ls} in $O(1)$ time. \pause
+    \item \lstinline{ls.pop(i)} removes the item with index \lstinline{i}
+    in \lstinline{ls} in $O(n)$ time. \pause
+  \end{itemize}
+  \begin{block}{Solution}
+    The magic sort runs in $O(n^2)$ time.
+  \end{block}
+\end{frame}
+
+\end{document}
