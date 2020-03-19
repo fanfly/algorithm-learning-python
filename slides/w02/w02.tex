@@ -11,6 +11,8 @@
   \titlepage
 \end{frame}
 
+\section{Time Complexity of Problems}
+\subsection{Definition}
 \begin{frame}{Time Complexity of a Problem}
   The time complexity $T(n)$ of a problem $P$ is the time complexity of the
   ``best'' algorithm that solves $P$. \pause
@@ -22,6 +24,7 @@
   \end{itemize}
 \end{frame}
 
+\subsection{The Primality Test Problem}
 \begin{frame}{The Primality Test Problem}
   \begin{block}{The Primality Test Problem}
     \begin{itemize}
@@ -43,6 +46,7 @@
   \end{itemize}
 \end{frame}
 
+\subsection{The Champion Problem}
 \begin{frame}[fragile]{The Champion Problem}
   \begin{block}{The Champion Problem}
     \begin{itemize}
@@ -70,6 +74,7 @@
   Thus, we have found an \emph{optimal} algorithm for the champion problem.
 \end{frame}
 
+\subsection{The Sorting Problem}
 \begin{frame}{The Sorting Problem}
   \begin{block}{The Sorting Problem}
     \begin{itemize}
@@ -82,6 +87,8 @@
   the sorting problem.
 \end{frame}
 
+\section{Algorithms Solving the Sorting Problem}
+\subsection{Merge Sort}
 \begin{frame}[fragile]{Merging Sorted Arrays}
   First, we propose an algorithm merging two sorted arrays $P$ and $Q$ into
   a sorted array $A$. \pause
@@ -188,6 +195,7 @@
   \end{equation*}
 \end{frame}
 
+\subsection{Lower Bound}
 \begin{frame}{Lower Bound of Comparison-Based Sorting}
   Any comparison-based algorithm can be seen as a binary tree. \pause
   \begin{center}
@@ -247,6 +255,7 @@
   Thus, any comparison-based algorithm runs in $\Omega(n \log_2 n)$ time.
 \end{frame}
 
+\subsection{Conclusion}
 \begin{frame}{Conclusion}
   \begin{block}{The Sorting Problem}
     \begin{itemize}
@@ -265,6 +274,8 @@
   \end{itemize}
 \end{frame}
 
+\section{Exercises}
+\subsection{\#1}
 \begin{frame}[fragile]{Exercise \#1}
   We have learned the binary search algorithm, which can search a value in a
   sorted array. \pause
@@ -330,6 +341,7 @@
   \end{block}
 \end{frame}
 
+\subsection{\#2}
 \begin{frame}{Exercise \#2}
   Suppose that $f$ and $g$ are functions such that
   \begin{equation*}
@@ -355,6 +367,7 @@
   \end{block}
 \end{frame}
 
+\subsection{\#3}
 \begin{frame}[fragile]{Exercise \#3}
   Please find the time complexity of the following algorithm using big-O
   notation. \pause
