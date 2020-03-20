@@ -1,0 +1,492 @@
+\documentclass{beamer}
+\usepackage{../mysty}
+
+\title{Week 03: Selection}
+\author{FanFly}
+\date{March 22, 2020}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{The Selection Problem}
+\subsection{Order Statistics}
+\begin{frame}{Order Statistics}
+  First, let us introduce the selction problem. \pause
+  \begin{block}{The Selection Problem}
+    \begin{itemize}
+      \item Input: An array $A$ of $n$ numbers and an index $k$ with
+      $0 \leq k < n$.
+      \item Output: The element at index $k$ in the sorted array reordered
+      from $A$. \pause
+    \end{itemize}
+  \end{block}
+  Note that the output is the $(k+1)$-th smallest number of $A$, which is the
+  $(k+1)$-th \emph{order statistic} of $A$. \pause
+  \begin{itemize}
+    \item It is useful in many cases, e.g., the $\lfloor(n-1)/2\rfloor$-th
+    order statistic is the \emph{lower median}.
+  \end{itemize}
+\end{frame}
+
+\section{Attempts}
+\subsection{\#1}
+\begin{frame}[fragile]{The First Attempt}
+  One can sort the array and then output the element at index $k$.
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def sort_and_select(A, k):
+        B = sorted(A)
+        return B[k]
+    \end{lstlisting}
+    \pause
+  \end{block}
+  What is its time complexity? \pause
+  \begin{itemize}
+    \item One needs $\Theta(n \log n)$ time to sort an array with length $n$.
+    \pause
+    \item Indexing takes time $\Theta(1)$. \pause
+  \end{itemize}
+  Thus, this algorithm runs in $\Theta(n \log n)$ time.
+\end{frame}
+
+\subsection{\#2}
+\begin{frame}[fragile]{The Second Attempt}
+  If $k$ is small, we can find only the $(k+1)$ smallest numbers.
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def partial_sort_and_select(A, k):
+        B = list(A)
+        for i in range(k + 1):
+            for j in range(i + 1, len(A)):
+                if B[j] < B[i]:
+                    B[i], B[j] = B[j], B[i]
+        return B[k]
+    \end{lstlisting}
+    \pause
+  \end{block}
+  What is its time complexity? \pause
+  \begin{itemize}
+    \item Swaping two elements takes $\Theta(1)$ time. \pause
+    \item The number of the inner iterations is
+    \small
+    \begin{equation*}
+      (n-1) + (n-2) + \cdots + (n-k-1) = \left(n-\frac{k+2}{2}\right)(k+1).
+    \end{equation*}
+    \pause
+  \end{itemize}
+  \vspace{-1em}
+  Thus, this algorithm runs in $\Theta(nk)$ time.
+\end{frame}
+
+\subsection{Comparison}
+\begin{frame}{Comparison of Two Attempts}
+  Let us compare the two algorithms. \pause
+  \begin{itemize}
+    \item The first attempt runs in $\Theta(n \log n)$ time. \pause
+    \item The second attempt runs in $\Theta(nk)$ time. \pause
+  \end{itemize}
+  Which one is faster? \pause
+  It depends on the size of $k$. \pause
+  \begin{itemize}
+    \item If $k$ is large (i.e., $k = \Omega(\log n)$), we can choose the first
+    method. \pause
+    \item If $k$ is small (i.e., $k = O(\log n)$), we can choose the second
+    method. \pause
+  \end{itemize}
+  Thus, we have an algorithm that runs in $\Theta(\min\{n \log n, nk\})$ time.
+\end{frame}
+
+\section{Quick Select}
+\subsection{Introduction}
+\begin{frame}{Quicker, Quicker!}
+  However, there exists faster algorithms that solve the selction problem.
+  \pause
+  \begin{itemize}
+    \item A deterministic algorithm, called the \emph{median of medians}
+    algorithm, solves the problem in $O(n)$ time. \pause
+    \item A randomized algorithm, called the \emph{quick select} algorithm,
+    solves the problem in expected $O(n)$ time. \pause
+  \end{itemize}
+  We are going to introduce the latter one, and thus we need to deal with
+  \emph{randomization} first.
+\end{frame}
+
+\subsection{Randomization}
+\begin{frame}[fragile]{Randomization}
+  We use the package \lstinline{random} to generate pseudo-random numbers.
+  \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    >>> import random
+    \end{lstlisting}
+    \pause
+  \end{block}
+
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    >>> random.random()    # generate number in [0.0, 1.0)
+    0.5476045155149599
+    \end{lstlisting}
+    \pause
+    \begin{lstlisting}[gobble=4]
+    >>> random.random()
+    0.630346861646684
+    \end{lstlisting}
+    \pause
+  \end{block}
+
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    >>> random.randrange(5)    # generate integer in [0, 5)
+    2
+    \end{lstlisting}
+    \pause
+    \begin{lstlisting}[gobble=4]
+    >>> random.randrange(5)
+    4
+    \end{lstlisting}
+    \pause
+    \begin{lstlisting}[gobble=4]
+    >>> random.randrange(5)
+    3
+    \end{lstlisting}
+    \pause
+  \end{block}
+  See the
+  \href{https://docs.python.org/3/library/random.html}
+       {offcial documentation page}
+  for more examples.
+\end{frame}
+
+\subsection{Partition}
+\begin{frame}[fragile]{Partition}
+  \setlength{\topsep}{0pt}
+  \setlength{\partopsep}{0pt}
+  Now we introduce the partition algorithm, which is really useful. \pause
+  \begin{itemize}
+    \item First, we choose the last element as \emph{pivot}. \pause
+    \item Then we reorder the array such that elements less than pivot come
+    before the pivot, while elements greater than pivot come after the pivot.
+    \pause
+  \end{itemize}
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def partition(A, l, r):
+        i = l
+        for j in range(l, r - 1):
+            if A[j] < A[r - 1]:
+                A[i], A[j] = A[j], A[i]
+                i += 1
+        A[i], A[r - 1] = A[r - 1], A[i]
+        return i
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Partition (cont.)}
+  \begin{center}
+    \begin{tikzpicture}[scale=0.65,every node/.style={scale=0.65}]
+      \def\l{7}
+      \begin{scope}[shift={(0, 0)}]
+        \def\j{1}
+        \def\k{1}
+        \node at (-1, 0) {Step 1};
+        \foreach \x [count=\i] in {3, 1, 4, 1, 5, 9, 2} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomRed\else
+            \ifnum \i<\l black!30\else
+            CustomGreen\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomRed!10\else
+                  \ifnum \i<\l white\else
+                  CustomGreen!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \pause
+      \begin{scope}[shift={(0, -1.2)}]
+        \def\j{1}
+        \def\k{2}
+        \node at (-1, 0) {Step 2};
+        \foreach \x [count=\i] in {3, 1, 4, 1, 5, 9, 2} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomRed\else
+            \ifnum \i<\l black!30\else
+            CustomGreen\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomRed!10\else
+                  \ifnum \i<\l white\else
+                  CustomGreen!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \pause
+      \begin{scope}[shift={(0, -2.4)}]
+        \def\j{2}
+        \def\k{3}
+        \node at (-1, 0) {Step 3};
+        \foreach \x [count=\i] in {1, 3, 4, 1, 5, 9, 2} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomRed\else
+            \ifnum \i<\l black!30\else
+            CustomGreen\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomRed!10\else
+                  \ifnum \i<\l white\else
+                  CustomGreen!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \pause
+      \begin{scope}[shift={(0, -3.6)}]
+        \def\j{2}
+        \def\k{4}
+        \node at (-1, 0) {Step 4};
+        \foreach \x [count=\i] in {1, 3, 4, 1, 5, 9, 2} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomRed\else
+            \ifnum \i<\l black!30\else
+            CustomGreen\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomRed!10\else
+                  \ifnum \i<\l white\else
+                  CustomGreen!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \pause
+      \begin{scope}[shift={(0, -4.8)}]
+        \def\j{3}
+        \def\k{5}
+        \node at (-1, 0) {Step 5};
+        \foreach \x [count=\i] in {1, 1, 4, 3, 5, 9, 2} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomRed\else
+            \ifnum \i<\l black!30\else
+            CustomGreen\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomRed!10\else
+                  \ifnum \i<\l white\else
+                  CustomGreen!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \pause
+      \begin{scope}[shift={(0, -6)}]
+        \def\j{3}
+        \def\k{6}
+        \node at (-1, 0) {Step 6};
+        \foreach \x [count=\i] in {1, 1, 4, 3, 5, 9, 2} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomRed\else
+            \ifnum \i<\l black!30\else
+            CustomGreen\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomRed!10\else
+                  \ifnum \i<\l white\else
+                  CustomGreen!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \pause
+      \begin{scope}[shift={(0, -7.2)}]
+        \def\j{3}
+        \def\k{7}
+        \node at (-1, 0) {Step 7};
+        \foreach \x [count=\i] in {1, 1, 4, 3, 5, 9, 2} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomRed\else
+            \ifnum \i<\l black!30\else
+            CustomGreen\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomRed!10\else
+                  \ifnum \i<\l white\else
+                  CustomGreen!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \pause
+      \begin{scope}[shift={(0, -8.4)}]
+        \def\j{3}
+        \def\k{4}
+        \node at (-1, 0) {Step 8};
+        \foreach \x [count=\i] in {1, 1, 2, 3, 5, 9, 4} {
+          \draw[
+            shift={(\i, 0)},
+            {\ifnum \i<\j CustomBlue\else
+            \ifnum \i<\k CustomGreen\else
+            \ifnum \i<\l CustomRed\else
+            CustomRed\fi\fi\fi},
+            fill={\ifnum \i<\j CustomBlue!10\else
+                  \ifnum \i<\k CustomGreen!10\else
+                  \ifnum \i<\l CustomRed!10\else
+                  CustomRed!10\fi\fi\fi},
+          ] (-0.45, -0.45) rectangle node {\x} (0.45, 0.45);
+        }
+      \end{scope}
+      \onslide<1->
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\subsection{Quick Select}
+\begin{frame}[fragile]{Quick Select}
+  With the partition procedure, one can select the any order statistic really
+  quickly!
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def quick_select(A, l, r, k):
+        i = partition(A, l, r)
+        if k == i:
+            return A[k]
+        elif k > i:
+            return quick_select(A, i + 1, r, k)
+        else:
+            return quick_select(A, l, i, k)
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+\subsection{Analysis}
+\begin{frame}{Analysis of Quick Select}
+  Let us analyze the time complexity of quick select. \pause
+  \begin{itemize}
+    \item The partition procedure runs in $\Theta(n)$ time when the array has
+    $n$ elements. \pause
+    \item If the partition is balanced, then we have
+    \begin{equation*}
+      T(n) = T(n/2) + \Theta(n)
+    \end{equation*}
+    for $n \geq 2$, implying $T(n) = \Theta(n)$. \pause
+    \item However, if the partition is unbalanced, then we may have
+    \begin{equation*}
+      T(n) = T(n - 1) + \Theta(n)
+    \end{equation*}
+    for $n \geq 2$, implying $T(n) = \Theta(n^2)$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Analysis of Quick Select (cont.)}
+  If we'd like to make the partition balanced, we can use some tricks. \pause
+  \begin{itemize}
+    \item Instead of choosing the last element as pivot, we can choose a random
+    element as pivot. \pause
+    \item With randomization, the partition is somehow balanced in most cases,
+    and it leads to a expected linear time complexity.
+  \end{itemize}
+\end{frame}
+
+\subsection{Conclusion}
+\begin{frame}{Conclusion}
+  The time complexity of the selction problem is $\Theta(n)$.
+  \begin{block}{The Selection Problem}
+    \begin{itemize}
+      \item Input: An array $A$ of $n$ numbers and an index $k$ with
+      $0 \leq k < n$.
+      \item Output: The element at index $k$ in the sorted array reordered
+      from $A$. \pause
+    \end{itemize}
+  \end{block}
+  The comparison among the algorithms that solves the selction problem is as
+  follows.
+  \begin{center}
+    \def\arraystretch{1.5}
+    \begin{tabular}{|c|c|}
+      \hline
+      Algorithm & Worst-case Time Complexity \\
+      \hline
+      Sorting (Merge Sort) & $\Theta(n \log n)$ \\
+      Partial Selection Sort & $\Theta(nk)$ \\
+      Quick Select & $\Theta(n)$ (expected) \\
+      Median of Medians & $\Theta(n)$ \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\section{Exercises}
+\subsection{\#1}
+\begin{frame}{Exercise \#1}
+  If $T(n)$ satisfies
+  \begin{equation*}
+    T(n) =
+    \begin{cases}
+      O(1), &\text{if $n \leq 1$} \\
+      T(n - 2) + \Theta(n), &\text{otherwise},
+    \end{cases}
+  \end{equation*}
+  what is the exact complexity of $T(n)$? \pause
+  \begin{block}{Solution}
+    We have $T(n) = \Theta(n^2)$.
+  \end{block}
+\end{frame}
+
+\subsection{\#2}
+\begin{frame}{Exercise \#2}
+  If $T(n)$ satisfies
+  \begin{equation*}
+    T(n) =
+    \begin{cases}
+      O(1), &\text{if $n \leq 1$} \\
+      T(9n/10) + \Theta(n), &\text{otherwise},
+    \end{cases}
+  \end{equation*}
+  what is the exact complexity of $T(n)$? \pause
+  \begin{block}{Solution}
+    Use the master theorem, and we have $T(n) = \Theta(n)$.
+  \end{block}
+\end{frame}
+
+\subsection{\#3}
+\begin{frame}[fragile]{Exercise \#3}
+  In fact, there is an algorithm called quick sort, that also uses the
+  partition procedure. \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def quick_sort(A, l, r):
+        if r - l <= 1:
+            return
+        i = partition(A, l, r)
+        quick_sort(A, l, i)
+        quick_sort(A, i + 1, r)
+    \end{lstlisting}
+    \pause
+  \end{block}
+  If you are really unlucky such that the partition is unbalanced in each
+  iteration, how much time will it takes to run quick sort? \pause
+  \begin{itemize}
+    \item You can assume that the pivot is always the largest element. \pause
+  \end{itemize}
+  \begin{block}{Solution}
+    It takes $\Theta(n^2)$ time. \\
+    (However, quick sort can run in expected $\Theta(n \log n)$ time if
+    randomization is used.)
+  \end{block}
+\end{frame}
+
+\end{document}
