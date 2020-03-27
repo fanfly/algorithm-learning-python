@@ -1,0 +1,254 @@
+\documentclass{beamer}
+\usepackage{../mysty}
+
+\title{Week 04: Alignment}
+\author{FanFly}
+\date{March 29, 2020}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Alignment}
+\subsection{Edit Distance}
+\begin{frame}[fragile]{Edit Distance}
+  \emph{Edit distance} is a way to quantify the ``distance'' between two
+  strings. \pause
+  \begin{itemize}
+    \item The distance is calculated by counting the minimum number of
+    operations needed to transform one string into the other. \pause
+    \item Different definitions of an edit distance use different sets of
+    string operations.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Edit Distance (cont.)}
+  Suppose that we want to find the edit distance between
+  {\color{red}\lstinline{weather}}
+  and
+  {\color{blue}\lstinline{whether}},
+  and we only allow insertion and deletion of a
+  character in a string. \pause
+  \begin{itemize}
+    \item We can transform
+    {\color{red}\lstinline{weather}}
+    into
+    {\color{blue}\lstinline{whether}}
+    by inserting an
+    {\color{blue}\lstinline{h}}
+    and deleting an
+    {\color{red}\lstinline{a}}, and thus the edit distance between them is 2.
+    \pause
+    \item Note that if we remove the different parts from both strings, we will
+    get their \emph{longest common subsequence}, i.e., \lstinline{wether}.
+    \pause
+    \item Conversely, if we can find their longest common subsequence, we can
+    calculate their edit distance.
+  \end{itemize}
+\end{frame}
+
+\subsection{Longest Common Subsequence}
+\begin{frame}[fragile]{Longest Common Subsequence}
+  Now we introduce the longest common subsequence problem. \pause
+  \begin{block}{The Longest Common Subsequence Problem}
+    \begin{itemize}
+      \item Input: Two sequences $A$ and $B$ of lengths $n$ and $m$,
+      respectively.
+      \item Output: A longest common subsequence of $A$ and $B$.
+    \end{itemize}
+    \pause
+  \end{block}
+  We can find a longest common subsequence of two sequences by finding an
+  alignment between them. \pause
+  \begin{center}
+    \lstinline{w-eather} \\
+    \lstinline{whe-ther}
+  \end{center}
+  \pause
+  Note that there may be more than one longest common subsequences. \pause
+  \begin{center}
+    \lstinline{mea--surement} \qquad \lstinline{-measur-ement} \\
+    \lstinline{--amus--ement} \qquad \lstinline{am---u-sement}
+  \end{center}
+\end{frame}
+
+\section{Algorithms}
+\subsection{Recursive Method}
+\begin{frame}{Recurrence Relation}
+  Let us look at some examples.
+  \begin{center}
+    \lstinline{c-a-ke} \quad \lstinline{-m--ask} \quad \lstinline{googol-} \\
+    \lstinline{-fad-e} \quad \lstinline{i-deas-} \quad \lstinline{goog-le}
+  \end{center}
+  \pause
+  Let $A = A' \cdot x$ and $B = B' \cdot y$, where $x$ and $y$ are the last
+  elements of $A$ and $B$, respectively. \pause
+  \begin{itemize}
+    \item If $x = y$, then we have
+    \begin{equation*}
+      \text{LCS}(A, B) = \text{LCS}(A', B') \cdot x.
+    \end{equation*}
+    \pause
+    \vspace{-1em}
+    \item Otherwise, we have
+    \begin{equation*}
+      \text{LCS}(A, B) = \text{LCS}(A, B')
+      \quad \text{or} \quad
+      \text{LCS}(A, B) = \text{LCS}(A', B).
+    \end{equation*}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Recursive Method}
+  Thus, it can be solved recursively! \pause
+  \begin{block}{}
+    \scriptsize
+    \begin{lstlisting}[gobble=4]
+    def lcs(A, B, n, m):
+        if n == 0 or m == 0:
+            return A[:0]
+        elif A[n - 1] == B[m - 1]:
+            return lcs(A, B, n - 1, m - 1) + A[n - 1]
+        else:
+            P = lcs(A, B, n - 1, m)
+            Q = lcs(A, B, n, m - 1)
+            if len(P) > len(Q):
+                return P
+            else:
+                return Q
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Time Complexity of Recursive Method}
+  What is its time complexity? \pause
+  We have
+  \begin{equation*}
+    T(n, m) =
+    \begin{cases}
+      O(1), & \text{if $n = 0$ or $m = 0$} \\
+      T(n, m - 1) + T(n - 1, m) + O(1), & \text{otherwise}.
+    \end{cases}
+  \end{equation*}
+  \pause
+  Thus, we can conclude that
+  \begin{equation*}
+    T(n, m) = \Theta\left(\frac{(n+m)!}{n! \cdot m!}\right),
+  \end{equation*}
+  which is really inefficient.
+\end{frame}
+
+\subsection{Dynamic Programming}
+\begin{frame}{Dynamic Programming}
+  Why the recursive method is so inefficient? \pause
+  \begin{itemize}
+    \item It solves the same subproblem over and over again. \pause
+    \item If the algorithm can remember the solutions to the solved
+    subproblems, then it can become more efficient.
+    \begin{center}
+      \ttfamily
+      \begin{tabular}{c|cccc}
+          & m & a & s & k \\ 
+        \hline
+        i & - & - & - & - \\
+        d & - & - & - & - \\
+        e & - & - & - & - \\
+        a & - & a & a & a \\
+        s & - & a & as & as
+      \end{tabular}
+    \end{center}
+    \pause
+    \vspace{.5em}
+    \item This improvement is called \emph{dynamic programming}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Dynamic Programming (cont.)}
+  With dynamic programming, we can solve the longest common subsequence problem
+  efficiently. \pause
+  \begin{itemize}
+    \item Assume that the length of longest common subsequence is $\ell$.
+    \pause
+    \item The content of each entry can be computed in $\Theta(\ell)$ time.
+    \pause
+    \item Thus, we can solve the problem in $O(nm\ell)$ time.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Improvement}
+  In fact, the time complexity can be improved to $O(nm)$ if we only memoize
+  the length of the longest common subsequence.
+  \begin{center}
+    \ttfamily
+    \begin{tabular}{c|cccc}
+        & m & a & s & k \\ 
+      \hline
+      i & 0 & 0 & 0 & 0 \\
+      d & 0 & 0 & 0 & 0 \\
+      e & \color{red}0 & 0 & 0 & 0 \\
+      a & 0 & \color{red}1 & 1 & 1 \\
+      s & 0 & 1 & \color{red}2 & \color{red}2
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\section{Exercises}
+\subsection{\#1}
+\begin{frame}{Exercise \#1}
+  Let $A$ and $B$ be sequences of lengths $n$ and $m$, respectively. \\[.5em]
+  \pause
+  If the length of longest common subsequence of $A$ and $B$ is $\ell$, what is
+  the edit distance between $A$ and $B$?
+  \begin{itemize}
+    \item Assume that only insertion and deletion are allowed to perform.
+    \pause
+  \end{itemize}
+  \begin{block}{Solution}
+    The edit distance between $A$ and $B$ is
+    $(n-\ell) + (m-\ell) = n + m - 2\ell$.
+  \end{block}
+\end{frame}
+
+\subsection{\#2}
+\begin{frame}{Exercise \#2}
+  Let $A$ be a sequence of length $n$ that does not have repeating elements. \\
+  Hoe many nonempty subsequences does $A$ have? \pause
+  \begin{block}{Solution}
+    It has $2^n - 1$ nonempty subsequences.
+  \end{block}
+\end{frame}
+
+\subsection{\#3}
+\begin{frame}{Exercise \#3}
+  Let $A$ and $B$ be sequences and let $f$ be a \emph{scoring function}.
+  Suppose that
+  \begin{equation*}
+    f(x, y) =
+    \begin{cases}
+      p, & \text{if $x = y$} \\
+      q, & \text{otherwise}.
+    \end{cases}
+  \end{equation*}
+  \pause
+  For any alignment, we can compute its score according to the scoring
+  function.
+\end{frame}
+
+\begin{frame}{Exercise \#3 (cont.)}
+  For example, the alignment below has score $3p + 6q$.
+  \begin{center}
+    \lstinline{goo---gle} \\
+    \lstinline{googol---}
+  \end{center}
+  \pause
+  Please determine the value of $p$ and $q$ such that the maximum score of
+  alignment of $A$ and $B$ is equal to the length of their longest common
+  subsequence. \pause
+  \begin{block}{Solution}
+    This property is satisfied when $p = 1$ and $q = 0$.
+  \end{block}
+\end{frame}
+
+\end{document}
